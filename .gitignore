@@ -1,0 +1,42 @@
+
+# Ignore Mac generated files
+*.DS_Store
+
+# Ignore java class files
+*.class
+
+# Ignore mobile tools for Java
+*.mtj.tmp/
+
+# Ignore object files
+*.o
+
+# Ignore package files
+*.war
+*.ear
+
+# Ignore ~ files
+*~
+
+# Ignore data files
+*.dat
+*.out
+*.xyz
+
+**/bin/*
+
+#TeX stuff
+*.bbl
+*.blg
+*.aux
+*.gz
+*.log
+*.out
+*.toc
+*.jpg
+*.eps
+**/report/*
+**/report/*
+
+# Ignore executable folder
+**/exe/*
