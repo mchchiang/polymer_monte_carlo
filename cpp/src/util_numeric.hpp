@@ -11,7 +11,7 @@
 #include <vector>
 #include <functional>
 
-struct Data2D {
+struct Data {
   std::vector<double> x;
   std::vector<double> y;
 };
@@ -22,13 +22,13 @@ double integrate(double start, double end, int nbins,
 
 // Build the cumulative distribution function for
 // a particular probability distribution function
-Data2D computeCDF(double start, double end, double inc, int nintbins,
+Data computeCDF(double start, double end, double inc, int nintbins,
                 const std::function<double(double)>& f);
 
 // Invert the x and y column of the data
-Data2D invert(const Data2D& inData);
+Data invert(const Data& inData);
 
-Data2D smooth(int nptsout, const Data2D& inData);
+Data smooth(int nptsout, const Data& inData);
 
 double linearInterpolate(double x1, double x2,
                          double y1, double y2, double x);

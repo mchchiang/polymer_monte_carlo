@@ -8,6 +8,7 @@
 #ifndef TORSION_DISTRB_HPP_
 #define TORSION_DISTRB_HPP_
 
+#include "distrb.hpp"
 #include "util_vector.hpp"
 
 class TorsionDistribution : public Distribution {

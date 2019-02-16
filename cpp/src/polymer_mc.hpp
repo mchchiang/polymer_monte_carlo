@@ -13,12 +13,16 @@
 #include <random>
 #include "bead.hpp"
 #include "bond.hpp"
-#include "angle.hpp"
-#include "torsion.hpp"
-#include "pair.hpp"
-#include "angle_distrb.hpp"
 #include "bond_distrb.hpp"
+#include "bond_factory.hpp"
+#include "angle.hpp"
+#include "angle_distrb.hpp"
+#include "angle_factory.hpp"
+#include "torsion.hpp"
 #include "torsion_distrb.hpp"
+#include "torsion_factory.hpp"
+#include "pair.hpp"
+#include "pair_factory.hpp"
 #include "util_random.hpp"
 #include "util_vector.hpp"
 
@@ -32,6 +36,11 @@ private:
 	int ntrials;
 	double temp;
 
+	int numOfBeadTypes;
+	int numOfBondTypes;
+	int numOfAngleTypes;
+	int numOfTorsionTypes;
+
   int newChainIndex;
   int oldChainIndex;
 
@@ -40,9 +49,9 @@ private:
 
 	Bead* chains[2];
 	std::vector<Bead*> neighbourList;
-	int* bondType;
-	int* angleType;
-	int* torsionType;
+	std::vector<int> bondType;
+	std::vector<int> angleType;
+	std::vector<int> torsionType;
 
 	Vec* trialPos;
 	Vec* trialCoords;
@@ -52,18 +61,25 @@ private:
 	double neighbourListCutoff;
 	bool hasOldChain;
 
+	BondFactory bondFactory;
+	AngleFactory angleFactory;
+	TorsionFactory torsionFactory;
+	PairFactory pairFactory;
+
 	Bond* bond;
 	Angle* angle;
+	Angle* angleNone;
 	Torsion* torsion;
+	Torsion* torsionNone;
 	Pair* pair;
 
-	RandomDouble rand;
+  BondDistribution* distrbBond;
+  AngleDistribution* distrbAngle;
+  AngleDistribution* distrbAngleUni;
+  TorsionDistribution* distrbTorsion;
+  TorsionDistribution* distrbTorsionUni;
 
-	BondDistribution* distrbBond;
-	AngleDistribution* distrbAngle;
-	AngleDistribution* distrbAngleUni;
-	TorsionDistribution* distrbTorsion;
-	TorsionDistribution* distrbTorsionUni;
+	RandomDouble rand;
 
 	// For coordinate transformation
 	Mat rotate;
@@ -96,14 +112,13 @@ public:
 
 	//void setNumTrials(int trials);
 
-  void setBond(Bond* bond);
-  void setAngle(Angle* angle);
-  void setTorsion(Torsion* torsion);
-  void setPair(Pair* pair);
-
-  void setBondDistribution(BondDistribution* distrb);
-  void setAngleDistribution(AngleDistribution* distrb);
-  void setTorsionDistribution(TorsionDistribution* distrb);
+  void setBond(std::string bondName,
+               const std::vector<double>& args, int seed);
+  void setAngle(std::string angleName,
+                const std::vector<double>& args, int seed);
+  void setTorsion(std::string torsionName,
+                  const std::vector<double>& args, int seed);
+  void setPair(std::string pairName, const std::vector<double>& args);
 
   void setBondType(int type);
   void setAngleType(int type);

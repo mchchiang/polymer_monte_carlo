@@ -19,7 +19,7 @@ private:
   double temp;
 
 public:
-  AngleDistributionCosine(int seed, AngleCosine* cosine, double temp) :
+  AngleDistributionCosine(double temp, int seed, AngleCosine* cosine) :
     AngleDistribution{seed}, angleCosine{cosine}, temp {temp} {}
   ~AngleDistributionCosine() {}
   void generate(int angleType, const Vec& v1, const Vec& v2,

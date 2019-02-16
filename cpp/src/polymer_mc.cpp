@@ -12,21 +12,16 @@
 #include <vector>
 #include <random>
 #include <cmath>
+#include <utility>
+#include <tuple>
 #include "polymer_mc.hpp"
-#include "bond_none.hpp"
-#include "angle_none.hpp"
-#include "torsion_none.hpp"
 #include "pair_none.hpp"
-#include "bond_distrb.hpp"
-#include "bond_distrb_fixed.hpp"
-#include "angle_distrb.hpp"
-#include "angle_distrb_uniform.hpp"
-#include "torsion_distrb.hpp"
-#include "torsion_distrb_uniform.hpp"
 #include "util_vector.hpp"
 
 using std::string;
 using std::vector;
+using std::pair;
+using std::tie;
 using std::cout;
 using std::endl;
 using std::ofstream;
@@ -37,6 +32,11 @@ PolymerMC::PolymerMC(double _boxSize, int _chainSize, int _seed, int _ntrials) :
   boxSize = _boxSize;
   chainSize = _chainSize;
   seed = _seed;
+
+  numOfBeadTypes = 1;
+  numOfBondTypes = 1;
+  numOfAngleTypes = 1;
+  numOfTorsionTypes = 1;
 
   ntrials = _ntrials;
   temp = 1.0;
@@ -51,10 +51,22 @@ PolymerMC::PolymerMC(double _boxSize, int _chainSize, int _seed, int _ntrials) :
 
   hasOldChain = false;
 
-  bond = new BondNone();
-  angle = new AngleNone();
-  torsion = new TorsionNone();
-  pair = new PairNone();
+  bondFactory = BondFactory();
+  angleFactory = AngleFactory();
+  torsionFactory = TorsionFactory();
+
+  tie(bond, distrbBond) =
+      bondFactory.createBond("fixed", numOfBondTypes, {1.0}, temp, 0);
+  tie(angle, distrbAngle) =
+      angleFactory.createAngle("none", numOfAngleTypes, {}, temp, 87);
+  tie(angleNone, distrbAngleUni) =
+      angleFactory.createAngle("none", numOfAngleTypes, {}, temp, 34);
+  tie(torsion, distrbTorsion) =
+      torsionFactory.createTorsion("none", numOfTorsionTypes, {}, temp, 32);
+  tie(torsionNone, distrbTorsionUni) =
+      torsionFactory.createTorsion("none", numOfTorsionTypes, {}, temp, 12);
+
+  pair = pairFactory.createPair("none", numOfBeadTypes, {});
 
   for (int i {}; i < 2; i++) {
     chains[i] = new Bead [chainSize];
@@ -62,14 +74,9 @@ PolymerMC::PolymerMC(double _boxSize, int _chainSize, int _seed, int _ntrials) :
 
   neighbourList = vector<Bead*>();
 
-  bondType = new int [chainSize];
-  angleType = new int [chainSize];
-  torsionType = new int [chainSize];
-  for (int i {}; i < chainSize; i++) {
-    bondType[i] = 0;
-    angleType[i] = 0;
-    torsionType[i] = 0;
-  }
+  bondType = vector<int>(chainSize, 0);
+  angleType = vector<int>(chainSize, 0);
+  torsionType = vector<int>(chainSize, 0);
 
   trialPos = new Vec [ntrials];
   trialCoords = new Vec [ntrials];
@@ -80,27 +87,20 @@ PolymerMC::PolymerMC(double _boxSize, int _chainSize, int _seed, int _ntrials) :
     trialNonBondEnergy[i] = 0.0;
   }
 
-  distrbBond = new BondDistributionFixed(56, 1.0);
-  distrbAngle = new AngleDistributionUniform(87);
-  distrbAngleUni = new AngleDistributionUniform(805);
-  distrbTorsion = new TorsionDistributionUniform(234);
-  distrbTorsionUni = new TorsionDistributionUniform(234);
-
   rotate = Mat::unity();
 }
 
 PolymerMC::~PolymerMC() {
   delete bond;
   delete angle;
+  delete angleNone;
   delete torsion;
+  delete torsionNone;
   delete pair;
 
   for (int i {}; i < 2; i++) {
     delete[] chains[i];
   }
-  delete[] bondType;
-  delete[] angleType;
-  delete[] torsionType;
 
   delete[] trialPos;
   delete[] trialCoords;
@@ -118,39 +118,33 @@ PolymerMC::~PolymerMC() {
   ntrials = trials;
 }*/
 
-void PolymerMC::setBond(Bond* _bond) {
+void PolymerMC::setBond(string bondName,
+                        const vector<double>& args, int _seed) {
   delete bond;
-  bond = _bond;
-}
-
-void PolymerMC::setAngle(Angle* _angle) {
-  delete angle;
-  angle = _angle;
-}
-
-void PolymerMC::setTorsion(Torsion* _torsion) {
-  delete torsion;
-  torsion = _torsion;
-}
-
-void PolymerMC::setPair(Pair* _pair) {
-  delete pair;
-  pair = _pair;
-}
-
-void PolymerMC::setBondDistribution(BondDistribution* distrb) {
   delete distrbBond;
-  distrbBond = distrb;
+  tie(bond, distrbBond) = bondFactory.createBond(
+      bondName, numOfBondTypes, args, temp, _seed);
 }
 
-void PolymerMC::setAngleDistribution(AngleDistribution* distrb) {
+void PolymerMC::setAngle(string angleName,
+                         const vector<double>& args, int _seed) {
+  delete angle;
   delete distrbAngle;
-  distrbAngle = distrb;
+  tie(angle, distrbAngle) = angleFactory.createAngle(
+      angleName, numOfAngleTypes, args, temp, _seed);
 }
 
-void PolymerMC::setTorsionDistribution(TorsionDistribution* distrb) {
+void PolymerMC::setTorsion(string torsionName,
+                           const vector<double>& args, int _seed) {
+  delete torsion;
   delete distrbTorsion;
-  distrbTorsion = distrb;
+  tie(torsion, distrbTorsion) = torsionFactory.createTorsion(
+      torsionName, numOfTorsionTypes, args, temp, _seed);
+}
+
+void PolymerMC::setPair(string pairName, const vector<double>& args) {
+  delete pair;
+  pair = pairFactory.createPair(pairName, numOfBeadTypes, args);
 }
 
 void PolymerMC::setBondType(int type) {

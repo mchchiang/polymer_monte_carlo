@@ -8,6 +8,8 @@
 #ifndef TORSION_HPP_
 #define TORSION_HPP_
 
+#include "util_vector.hpp"
+
 class Torsion {
 
 public:

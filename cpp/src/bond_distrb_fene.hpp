@@ -19,7 +19,7 @@ class BondDistributionFENE : public BondDistribution {
 private:
   BondFENE* feneBond;
   double temp;
-  std::vector<Data2D> invcdf;
+  std::vector<Data> invcdf;
   int nbins;
   double binsize;
   int ntypes;

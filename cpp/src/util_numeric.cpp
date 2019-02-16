@@ -34,10 +34,10 @@ double integrate(double start, double end, int nbins,
 
 // Build the cumulative distribution function for
 // a particular probability distribution function
-Data2D computeCDF(double start, double end, double inc, int nintbins,
+Data computeCDF(double start, double end, double inc, int nintbins,
                 const function<double(double)>& f) {
   int nbins {static_cast<int>(ceil((end-start)/inc))};
-  Data2D data;
+  Data data;
   data.x = vector<double>(nbins);
   data.y = vector<double>(nbins);
 
@@ -57,10 +57,10 @@ Data2D computeCDF(double start, double end, double inc, int nintbins,
   return data;
 }
 
-Data2D invert(const Data2D& inData) {
+Data invert(const Data& inData) {
   vector<double> xnew;
   vector<double> ynew;
-  Data2D outData;
+  Data outData;
   xnew = vector<double>(inData.y);
   ynew = vector<double>(inData.x);
   outData.x = xnew;
@@ -68,12 +68,12 @@ Data2D invert(const Data2D& inData) {
   return outData;
 }
 
-Data2D smooth(int nptsout, const Data2D& inData) {
+Data smooth(int nptsout, const Data& inData) {
   int nptsin {static_cast<int>(inData.x.size())};
   double start {inData.x[0]};
   double end {inData.x[nptsin-1]};
   double inc {(end-start)/static_cast<double>(nptsout-1)};
-  Data2D outData;
+  Data outData;
   outData.x = vector<double>(nptsout);
   outData.y = vector<double>(nptsout);
 

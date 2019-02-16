@@ -25,7 +25,7 @@ FENEDistrb::BondDistributionFENE(int _ntypes, double _temp,
   BondDistribution{seed}, feneBond {fene}, temp {_temp}, ntypes {_ntypes} {
   nbins = 1000;
   binsize = 1.0 / static_cast<double>(nbins);
-  invcdf = vector<Data2D>(ntypes);
+  invcdf = vector<Data>(ntypes);
 
   int nintbins {1000};
   double cdfinc {0.001};
@@ -35,7 +35,7 @@ FENEDistrb::BondDistributionFENE(int _ntypes, double _temp,
   double norm;
 
   function<double(double)> f;
-  Data2D cdf;
+  Data cdf;
 
   for (int i {}; i < ntypes; i++) {
     end = feneBond->getCoeff(i,3)-buffer;
