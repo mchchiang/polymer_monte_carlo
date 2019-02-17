@@ -42,11 +42,11 @@ void Bead::setType(int t) {
   type = t;
 }
 
-int Bead::getMask() const {
+unsigned int Bead::getMask() const {
   return mask;
 }
 
-void Bead::setMask(int m) {
+void Bead::setMask(unsigned int m) {
   mask = m;
 }
 

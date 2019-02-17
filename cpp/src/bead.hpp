@@ -16,7 +16,7 @@ private:
   Vec pos;
   int image[3]; // Image count for periodic boundaries
   int type;
-  int mask;
+  unsigned int mask;
 
 public:
   Bead();
@@ -29,8 +29,8 @@ public:
   void setImage(int comp, int value);
   int getType() const;
   void setType(int type);
-  int getMask() const;
-  void setMask(int mask);
+  unsigned int getMask() const;
+  void setMask(unsigned int mask);
 
 };
 

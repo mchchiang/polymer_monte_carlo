@@ -9,7 +9,6 @@
 #define PAIR_HPP_
 
 #include <vector>
-
 #include "util_vector.hpp"
 
 class Pair {

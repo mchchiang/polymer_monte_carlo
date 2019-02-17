@@ -10,6 +10,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include <set>
 #include <random>
 #include "bead.hpp"
 #include "bond.hpp"
@@ -23,13 +25,15 @@
 #include "torsion_factory.hpp"
 #include "pair.hpp"
 #include "pair_factory.hpp"
+#include "wall.hpp"
+#include "wall_factory.hpp"
 #include "util_random.hpp"
 #include "util_vector.hpp"
 
 class PolymerMC {
 
 private:
-	int boxSize;
+	double lx, ly, lz;
 	int chainSize;
 	int seed;
 
@@ -47,16 +51,20 @@ private:
   double newLogRosenbluth;
   double oldLogRosenbluth;
 
-	Bead* chains[2];
+	std::vector<Bead> chains[2];
 	std::vector<Bead*> neighbourList;
 	std::vector<int> bondType;
 	std::vector<int> angleType;
 	std::vector<int> torsionType;
 
-	Vec* trialPos;
-	Vec* trialCoords;
-	double* trialBondEnergy;
-	double* trialNonBondEnergy;
+	std::vector<Vec> trialPos;
+	std::vector<Vec> trialCoords;
+	std::vector<double> trialProbs;
+	std::vector<double> trialBondEnergy;
+	std::vector<double> trialNonBondEnergy;
+
+	int numOfGroups;
+	std::map<std::string,unsigned int> groups;
 
 	double neighbourListCutoff;
 	bool hasOldChain;
@@ -65,6 +73,7 @@ private:
 	AngleFactory angleFactory;
 	TorsionFactory torsionFactory;
 	PairFactory pairFactory;
+	WallFactory wallFactory;
 
 	Bond* bond;
 	Angle* angle;
@@ -72,6 +81,7 @@ private:
 	Torsion* torsion;
 	Torsion* torsionNone;
 	Pair* pair;
+	std::map<std::string, Wall*> walls;
 
   BondDistribution* distrbBond;
   AngleDistribution* distrbAngle;
@@ -97,32 +107,35 @@ public:
 
 	void growNewChain();
 	void traceOldChain();
-	void buildNeighbourList(Bead* chain, int beadIndex, double cutoff);
+	void buildNeighbourList(std::vector<Bead>& chain,
+	                        int beadIndex, double cutoff);
 
-	double computeNonBondEnergy(Bead* chain, int pairType,
+	double computeNonBondEnergy(std::vector<Bead>& chain, int pairType,
 	                            int beadIndex, const Vec& pos);
-	double computeWallEnergy(const Vec& pos);
+	double computeWallEnergy(unsigned int beadMask, const Vec& pos);
 
 	void run(int nequil, int nsteps, int nsample);
 	void mcstep(int isteps);
 
-	// Accessor methods
-	//int getChainSize() const;
-	//double getBoxSize() const;
-
-	//void setNumTrials(int trials);
-
-  void setBond(std::string bondName,
+  void setBond(const std::string& bondName,
                const std::vector<double>& args, int seed);
-  void setAngle(std::string angleName,
+  void setAngle(const std::string& angleName,
                 const std::vector<double>& args, int seed);
-  void setTorsion(std::string torsionName,
+  void setTorsion(const std::string& torsionName,
                   const std::vector<double>& args, int seed);
   void setPair(std::string pairName, const std::vector<double>& args);
 
   void setBondType(int type);
   void setAngleType(int type);
   void setTorsionType(int type);
+
+  void createGroupWith(const std::string& groupName, const std::set<int>& types);
+  void deleteGroup(const std::string& groupName);
+
+  void createWall(const std::string& wallID, const std::string& groupName,
+                  const std::string& wallType, int dir, double pos,
+                  bool fromBelow, const std::vector<double>& args);
+  void deleteWall(const std::string& wallID);
 
   void setNeighbourListCutoff(double cutoff);
 };
