@@ -22,9 +22,8 @@ double AngleCosine::compute(int type, const Vec& v1,
                             const Vec& v2, const Vec& v3) {
   // U(theta) = K(1 - cos(theta))
   // Get angle theta
-  Vec t1, t2;
-  Vec::diff(v2, v1, t1);
-  Vec::diff(v3, v2, t2);
+  Vec t1 {Vec::diff(v2, v1)};
+  Vec t2 {Vec::diff(v3, v2)};
   double theta = Vec::dot(t1, t2) / (Vec::mag(t1) * Vec::mag(t2));
   return k[type]*(1-cos(theta));
 }
@@ -37,6 +36,10 @@ void AngleCosine::setCoeff(int type, const vector<double>& args) {
   if (args.size() >= 1) {
     k[type] = args[0];
   }
+}
+
+void AngleCosine::setCoeff(int type, int iarg, double value) {
+  k[type] = value;
 }
 
 double AngleCosine::getCoeff(int type, int iarg) {

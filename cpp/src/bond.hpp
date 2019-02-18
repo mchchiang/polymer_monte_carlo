@@ -16,10 +16,11 @@ class Bond {
 
 public:
   virtual ~Bond() {}
-  virtual double compute(int bondType, const Vec& r1, const Vec& r2) = 0;
-  virtual double compute(int bondType, double r) = 0;
-  virtual void setCoeff(int bondType, const std::vector<double>& args) = 0;
-  virtual double getCoeff(int bondType, int iarg) = 0;
+  virtual double compute(int type, const Vec& r1, const Vec& r2) = 0;
+  virtual double compute(int type, double r) = 0;
+  virtual void setCoeff(int type, const std::vector<double>& args) = 0;
+  virtual void setCoeff(int type, int iarg, double value) = 0;
+  virtual double getCoeff(int type, int iarg) = 0;
 
 };
 

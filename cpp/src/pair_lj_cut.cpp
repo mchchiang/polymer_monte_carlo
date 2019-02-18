@@ -6,6 +6,7 @@
  */
 
 #include <vector>
+#include <limits>
 #include "pair_lj_cut.hpp"
 #include "util_vector.hpp"
 
@@ -44,10 +45,33 @@ double PairLJCut::compute(int type1, int type2, double r) {
 
 void PairLJCut::setCoeff(int type1, int type2, const vector<double>& args) {
   if (args.size() == 3) {
-    int type {type1*ntypes+type2};
-    epsilon[type] = args[0];
-    sigma[type] = args[1];
-    cutoff[type] = args[2];
+    int t1 {type1*ntypes+type2};
+    int t2 {type2*ntypes+type1};
+    epsilon[t1] = args[0];
+    epsilon[t2] = args[0];
+    sigma[t1] = args[1];
+    sigma[t2] = args[1];
+    cutoff[t1] = args[2];
+    cutoff[t2] = args[2];
+  }
+}
+
+void PairLJCut::setCoeff(int type1, int type2, int iarg, double value) {
+  int t1 {type1*ntypes+type2};
+  int t2 {type2*ntypes+type1};
+  switch(iarg) {
+    case 0:
+      epsilon[t1] = value;
+      epsilon[t2] = value;
+      break;
+    case 1:
+      sigma[t1] = value;
+      sigma[t2] = value;
+      break;
+    case 2:
+      cutoff[t1] = value;
+      cutoff[t2] = value;
+      break;
   }
 }
 

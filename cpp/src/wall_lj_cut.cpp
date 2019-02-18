@@ -6,6 +6,7 @@
  */
 
 #include <vector>
+#include <limits>
 #include "wall_lj_cut.hpp"
 #include "util_vector.hpp"
 
@@ -50,6 +51,14 @@ void WallLJCut::setCoeff(const vector<double>& args) {
     epsilon = args[0];
     sigma = args[1];
     cutoff = args[2];
+  }
+}
+
+void WallLJCut::setCoeff(int iarg, double value) {
+  switch(iarg) {
+    case 0: epsilon = value; break;
+    case 1: sigma = value; break;
+    case 2: cutoff = value; break;
   }
 }
 

@@ -17,10 +17,11 @@ class BondNone : public Bond {
 public:
   BondNone() {}
   ~BondNone() {}
-  double compute(int bondType, const Vec& r1, const Vec& r2) {return 0.0;}
-  double compute(int bondType, double r) {return 0.0;}
-  void setCoeff(int bondType, const std::vector<double>& args) {} // Do nothing
-  double getCoeff(int bondType, int iarg) {return 0.0;}
+  double compute(int type, const Vec& r1, const Vec& r2) {return 0.0;}
+  double compute(int type, double r) {return 0.0;}
+  void setCoeff(int type, const std::vector<double>& args) {} // Do nothing
+  void setCoeff(int type, int iarg, double value) {} // Do nothing
+  double getCoeff(int type, int iarg) {return 0.0;}
 
 };
 

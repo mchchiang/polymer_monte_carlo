@@ -16,10 +16,11 @@ class Angle {
 
 public:
   virtual ~Angle() {}
-  virtual double compute(int angleType, const Vec& r1,
+  virtual double compute(int type, const Vec& r1,
                          const Vec& r2, const Vec& r3) = 0;
-  virtual double compute(int angleType, double theta) = 0;
+  virtual double compute(int type, double theta) = 0;
   virtual void setCoeff(int type, const std::vector<double>& args) = 0;
+  virtual void setCoeff(int type, int iarg, double value) = 0;
   virtual double getCoeff(int type, int iarg) = 0;
 
 };

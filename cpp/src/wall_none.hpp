@@ -17,6 +17,7 @@ public:
   ~WallNone() {}
   double compute(unsigned int beadMask, const Vec& pos) {return 0.0;}
   void setCoeff(const std::vector<double>& args) {}
+  void setCoeff(int iarg, double value) {}
   double getCoeff(int iarg) {return 0.0;}
   unsigned int getMask() {return 0;}
 };

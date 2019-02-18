@@ -28,6 +28,7 @@ public:
   ~WallLJCut();
   double compute(unsigned int beadMask, const Vec& pos);
   void setCoeff(const std::vector<double>& args);
+  void setCoeff(int iarg, double value);
   double getCoeff(int iarg);
   unsigned int getMask();
 

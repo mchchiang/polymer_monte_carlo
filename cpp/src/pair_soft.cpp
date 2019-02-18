@@ -37,9 +37,27 @@ double PairSoft::compute(int type1, int type2, double r) {
 
 void PairSoft::setCoeff(int type1, int type2, const vector<double>& args) {
   if (args.size() == 2) {
-    int type {type1*ntypes+type2};
-    a[type] = args[0];
-    cutoff[type] = args[1];
+    int t1 {type1*ntypes+type2};
+    int t2 {type2*ntypes+type1};
+    a[t1] = args[0];
+    a[t2] = args[0];
+    cutoff[t1] = args[1];
+    cutoff[t2] = args[1];
+  }
+}
+
+void PairSoft::setCoeff(int type1, int type2, int iarg, double value) {
+  int t1 {type1*ntypes+type2};
+  int t2 {type2*ntypes+type1};
+  switch(iarg) {
+    case 0:
+      a[t1] = value;
+      a[t2] = value;
+      break;
+    case 1:
+      cutoff[t1] = value;
+      cutoff[t2] = value;
+      break;
   }
 }
 

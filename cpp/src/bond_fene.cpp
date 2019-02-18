@@ -8,6 +8,7 @@
 
 #include <cmath>
 #include <vector>
+#include <limits>
 #include "bond_fene.hpp"
 #include "util_vector.hpp"
 
@@ -50,6 +51,15 @@ void BondFENE::setCoeff(int type, const std::vector<double>& args) {
     sigma[type] = args[1];
     kf[type] = args[2];
     r0[type] = args[3];
+  }
+}
+
+void BondFENE::setCoeff(int type, int iarg, double value) {
+  switch(iarg) {
+    case 0: epsilon[type] = value; break;
+    case 1: sigma[type] = value; break;
+    case 2: kf[type] = value; break;
+    case 3: r0[type] = value; break;
   }
 }
 

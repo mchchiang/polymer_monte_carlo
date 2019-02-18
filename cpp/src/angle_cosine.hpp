@@ -23,6 +23,7 @@ public:
   double compute(int type, const Vec& v1, const Vec& v2, const Vec& v3);
   double compute(int type, double theta);
   void setCoeff(int type, const std::vector<double>& k);
+  void setCoeff(int type, int iarg, double value);
   double getCoeff(int type, int iarg);
 
 };

@@ -27,6 +27,7 @@ public:
   double compute(int type, const Vec& r1, const Vec& r2);
   double compute(int type, double r);
   void setCoeff(int type, const std::vector<double>& args);
+  void setCoeff(int type, int iarg, double value);
   double getCoeff(int type, int iarg);
 
 };

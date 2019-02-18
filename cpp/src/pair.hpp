@@ -20,6 +20,7 @@ public:
   virtual double compute(int type1, int type2, double r) = 0;
   virtual void setCoeff(int type1, int type2,
                         const std::vector<double>& args) = 0;
+  virtual void setCoeff(int type1, int type2, int iarg, double value) = 0;
   virtual double getCoeff(int type1, int type2, int iarg) = 0;
 
 };

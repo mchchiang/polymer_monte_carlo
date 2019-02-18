@@ -17,6 +17,7 @@ public:
   virtual ~Wall() {}
   virtual double compute(unsigned int beadMask, const Vec& pos) = 0;
   virtual void setCoeff(const std::vector<double>& args) = 0;
+  virtual void setCoeff(int iarg, double value) = 0;
   virtual double getCoeff(int iarg) = 0;
   virtual unsigned int getMask() = 0;
 };
