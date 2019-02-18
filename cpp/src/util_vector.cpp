@@ -71,16 +71,20 @@ double Vec::dist2(const Vec& a, const Vec& b) {
   return delx * delx + dely * dely + delz * delz;
 }
 
-void Vec::add(const Vec& a, const Vec& b, Vec& c) {
+Vec Vec::add(const Vec& a, const Vec& b) {
+  Vec c {};
   c.vec[0] = a.vec[0] + b.vec[0];
   c.vec[1] = a.vec[1] + b.vec[1];
   c.vec[2] = a.vec[2] + b.vec[2];
+  return c;
 }
 
-void Vec::diff(const Vec& a, const Vec& b, Vec& c) {
+Vec Vec::diff(const Vec& a, const Vec& b) {
+  Vec c {};
   c.vec[0] = a.vec[0] - b.vec[0];
   c.vec[1] = a.vec[1] - b.vec[1];
   c.vec[2] = a.vec[2] - b.vec[2];
+  return c;
 }
 
 double Vec::dot(const Vec& a, const Vec& b) {

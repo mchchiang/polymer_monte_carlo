@@ -27,7 +27,6 @@ public:
   Vec& operator =(const Vec& v);
   bool operator ==(const Vec& v);
   Vec operator +(const Vec& v) const;
-  Vec& operator -(const Vec& v);
   Vec operator -(const Vec& v) const;
   Vec operator *(double a) const;
   Vec operator /(double a) const;
@@ -36,8 +35,8 @@ public:
   static double mag2(const Vec& a);
   static double dist(const Vec& a, const Vec& b);
   static double dist2(const Vec& a, const Vec& b);
-  static void add(const Vec& a, const Vec& b, Vec& c);
-  static void diff(const Vec& a, const Vec& b, Vec& c);
+  static Vec add(const Vec& a, const Vec& b);
+  static Vec diff(const Vec& a, const Vec& b);
   static double dot(const Vec& a, const Vec& b);
 
 };
