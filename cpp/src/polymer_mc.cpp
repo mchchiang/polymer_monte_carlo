@@ -29,11 +29,11 @@ using std::endl;
 using std::ofstream;
 using std::stringstream;
 
-PolymerMC::PolymerMC(double _boxSize, int _chainSize, int _seed, int _ntrials) :
+PolymerMC::PolymerMC(double boxSize, int _chainSize, int _seed, int _ntrials) :
+  box {Box(-boxSize*0.5, boxSize*0.5, -boxSize*0.5, boxSize*0.5,
+            -boxSize*0.5, boxSize*0.5, true, true, false)},
   rand {RandomDouble(_seed, 0.0, 1.0)} {
-  lx = _boxSize;
-  ly = _boxSize;
-  lz = _boxSize;
+
   chainSize = _chainSize;
   seed = _seed;
 
@@ -62,16 +62,21 @@ PolymerMC::PolymerMC(double _boxSize, int _chainSize, int _seed, int _ntrials) :
   angleFactory = AngleFactory();
   torsionFactory = TorsionFactory();
 
+  std::mt19937 mt(seed);
+  std::uniform_int_distribution<int> randInt (0, 1E4);
+
   tie(bond, distrbBond) =
-      bondFactory.createBond("fixed", numOfBondTypes, {1.0}, temp, 0);
+      bondFactory.createBond("fixed", numOfBondTypes, {1.0}, temp, randInt(mt));
   tie(angle, distrbAngle) =
-      angleFactory.createAngle("none", numOfAngleTypes, {}, temp, 87);
+      angleFactory.createAngle("none", numOfAngleTypes, {}, temp, randInt(mt));
   tie(angleNone, distrbAngleUni) =
-      angleFactory.createAngle("none", numOfAngleTypes, {}, temp, 34);
+      angleFactory.createAngle("none", numOfAngleTypes, {}, temp, randInt(mt));
   tie(torsion, distrbTorsion) =
-      torsionFactory.createTorsion("none", numOfTorsionTypes, {}, temp, 32);
+      torsionFactory.createTorsion(
+          "none", numOfTorsionTypes, {}, temp, randInt(mt));
   tie(torsionNone, distrbTorsionUni) =
-      torsionFactory.createTorsion("none", numOfTorsionTypes, {}, temp, 12);
+      torsionFactory.createTorsion(
+          "none", numOfTorsionTypes, {}, temp, randInt(mt));
 
   pair = pairFactory.createPair("none", numOfBeadTypes, {});
 
@@ -86,6 +91,10 @@ PolymerMC::PolymerMC(double _boxSize, int _chainSize, int _seed, int _ntrials) :
 
   trialPos = vector<Vec>(ntrials, Vec(0.0, 0.0, 0.0));
   trialCoords = vector<Vec>(ntrials, Vec(0.0, 0.0, 0.0));
+  trialImage = vector<int*>(ntrials);
+  for (int i {}; i < ntrials; i++) {
+    trialImage[i] = new int[3];
+  }
   trialProbs = vector<double>(ntrials, 0.0);
   trialBondEnergy = vector<double>(ntrials, 0.0);
   trialNonBondEnergy = vector<double>(ntrials, 0.0);
@@ -97,6 +106,10 @@ PolymerMC::~PolymerMC() {
   chains[0].clear();
   chains[1].clear();
   neighbourList.clear();
+
+  for (int i {}; i < ntrials; i++) {
+    delete trialImage[i];
+  }
 
   delete distrbBond;
   delete distrbAngle;
@@ -226,7 +239,7 @@ void PolymerMC::createWall(const string& wallID, const string& groupName,
   if (walls.find(wallID) == walls.end() &&
       groups.find(groupName) != groups.end()) {
     unsigned int mask {groups[groupName]};
-    Wall* wall = wallFactory.createWall(wallType, mask, dir, pos, below, args);
+    Wall* wall {wallFactory.createWall(wallType, mask, dir, pos, below, args)};
     walls[wallID] = wall;
   }
 }
@@ -240,20 +253,24 @@ void PolymerMC::deleteWall(const string& wallID) {
 }
 
 void PolymerMC::run(int nequil, int nsteps, int nsample) {
+  ofstream writer ("pos1.dat");
   for (int n {}; n < nequil; n++) {
     mcstep(n);
   }
   for (int n {}; n < nsteps; n++) {
+    cout << "Step " << n << endl;
     mcstep(n);
     if (n % nsample == 0) {
       stringstream ss;
       ss.clear();
       ss << "pos_t_" << n << ".dat";
-      ofstream writer (ss.str());
+      //ofstream writer (ss.str());
       Vec* v;
+      writer << chainSize << endl;
+      writer << "Atoms. Timestep: " << n << endl;
       for (int i {}; i < chainSize; i++) {
         v = chains[newChainIndex][i].getPos();
-        writer << i << " " << (*v)[0] << " "
+        writer << "O " << (*v)[0] << " "
                << (*v)[1] << " " << (*v)[2] << endl;
       }
     }
@@ -273,9 +290,6 @@ void PolymerMC::mcstep(int istep) {
       oldChainIndex = (oldChainIndex == 0 ? 1 : 0);
       newChainIndex = (newChainIndex == 0 ? 1 : 0);
       accepted = true;
-      cout << istep << " accepted" << endl;
-    } else {
-      cout << istep << " rejected" << endl;
     }
   }
 }
@@ -283,11 +297,12 @@ void PolymerMC::mcstep(int istep) {
 void PolymerMC::growNewChain() {
   rotate.toUnity();
   newLogRosenbluth = 0.0;
-  double weight {}; // Rosenbluth weight
+
+  chains[newChainIndex][0].setPos({0.0, 0.0, box.getBoxHi(2)});
+
   int btype, atype, ttype, ptype;
   unsigned int beadMask;
   Vec* v1; Vec* v2; Vec* v3;
-  double expEnergy;
 
   for (int i {1}; i < chainSize; i++) {
     v1 = chains[newChainIndex][i-1].getPos();
@@ -300,6 +315,8 @@ void PolymerMC::growNewChain() {
     beadMask = chains[newChainIndex][i].getMask();
     buildNeighbourList(chains[newChainIndex], i-1, neighbourListCutoff);
 
+    double expEnergy {};
+    double weight {}; // Rosenbluth weight
     for (int k {}; k < ntrials; k++) {
       generateBead(*v1, *v2, *v3, btype, atype, ttype,
                    i, &trialCoords[k], &trialBondEnergy[k]);
@@ -313,8 +330,13 @@ void PolymerMC::growNewChain() {
       double sinphi {sin(phi)};
       Vec pos {r*sintheta*cosphi, r*sintheta*sinphi, r*costheta};
 
+      for (int j {}; j < 3; j++) {
+        trialImage[k][j] = chains[newChainIndex][i-1].getImage(j);
+      }
+
       // Get lab frame coordinates
       trialPos[k] = Mat::matvec(rotate, pos) + *v1;
+      box.wrapPos(&trialPos[k], trialImage[k]);
 
       trialNonBondEnergy[k] =
           computeNonBondEnergy(chains[newChainIndex], ptype, i, trialPos[k]);
@@ -325,11 +347,10 @@ void PolymerMC::growNewChain() {
     }
 
     // Pick which trial segment to accept
-    double sum {};
     for (int k {}; k < ntrials; k++) {
-      trialProbs[k] = trialProbs[k]/weight + sum;
-      sum += trialProbs[k];
+      trialProbs[k] = trialProbs[k]/weight;
     }
+
     double p {rand.nextDouble()};
     int selected {};
     for (int k {}; k < ntrials; k++) {
@@ -341,16 +362,14 @@ void PolymerMC::growNewChain() {
     }
 
     chains[newChainIndex][i].setPos(trialPos[selected]);
-
+    for (int k {}; k < 3; k++) {
+      chains[newChainIndex][i].setImage(k, trialImage[selected][k]);
+    }
     rotate.dot(getRotateMatrix(trialCoords[selected][1],
                                trialCoords[selected][2]));
 
     newLogRosenbluth += log(weight);
-
-    weight = 0.0;
   }
-
-  cout << newLogRosenbluth << endl;
 }
 
 Mat PolymerMC::getRotateMatrix(double theta, double phi) {
@@ -376,11 +395,10 @@ Mat PolymerMC::getRotateMatrix(double theta, double phi) {
 void PolymerMC::traceOldChain() {
   rotate.toUnity();
   oldLogRosenbluth = 0.0;
-  double weight {}; // Rosenbluth weight
+
   int btype, atype, ttype, ptype;
   unsigned int beadMask;
   Vec* v1; Vec* v2; Vec* v3;
-  double expEnergy;
 
   for (int i {1}; i < chainSize; i++) {
     trialPos[0] = *chains[oldChainIndex][i].getPos(); // Store current config
@@ -394,6 +412,9 @@ void PolymerMC::traceOldChain() {
     beadMask = chains[oldChainIndex][i].getMask();
     buildNeighbourList(chains[oldChainIndex], i-1, neighbourListCutoff);
 
+    double weight {}; // Rosenbluth weight
+    double expEnergy {};
+
     for (int k {1}; k < ntrials; k++) {
       generateBead(*v1, *v2, *v3, btype, atype, ttype,
                    i, &trialCoords[k], &trialBondEnergy[k]);
@@ -405,11 +426,15 @@ void PolymerMC::traceOldChain() {
       double sintheta {sin(theta)};
       double cosphi {cos(phi)};
       double sinphi {sin(phi)};
-
       Vec pos {r*sintheta*cosphi, r*sintheta*sinphi, r*costheta};
+
+      for (int j {}; j < 3; j++) {
+        trialImage[k][j] = chains[newChainIndex][i-1].getImage(j);
+      }
 
       // Get lab frame coordinates
       trialPos[k] = Mat::matvec(rotate, pos) + *v1;
+      box.wrapPos(&trialPos[k], trialImage[k]);
 
       trialNonBondEnergy[k] =
           computeNonBondEnergy(chains[oldChainIndex], ptype, i, trialPos[k]);
@@ -421,20 +446,19 @@ void PolymerMC::traceOldChain() {
     rotate.dot(getRotateMatrix(trialCoords[0][1], trialCoords[0][2]));
 
     oldLogRosenbluth += log(weight);
-    weight = 0.0;
   }
-
-  cout << oldLogRosenbluth << endl;
 }
 
 void PolymerMC::buildNeighbourList(vector<Bead>& chain,
                                    int beadIndex, double cutoff) {
   neighbourList.clear();
   Vec* v1; Vec* v2;
+  double r;
   v1 = chain[beadIndex].getPos();
   for (int i {}; i < beadIndex; i++) {
     v2 = chain[i].getPos();
-    if (Vec::dist(*v1,*v2) < cutoff) {
+    r = box.dist(*v1, *v2);
+    if (r < cutoff) {
       neighbourList.push_back(&chain[i]);
     }
   }
@@ -443,9 +467,12 @@ void PolymerMC::buildNeighbourList(vector<Bead>& chain,
 double PolymerMC::computeNonBondEnergy(vector<Bead>& chain, int pairType,
                                        int beadIndex, const Vec& pos) {
   double energy {};
+  double r {};
+  Vec* v;
   for (size_t i {}; i < neighbourList.size(); i++) {
-    energy += pair->compute(neighbourList[i]->getType(), pairType,
-                            *(neighbourList[i]->getPos()), pos);
+    v = neighbourList[i]->getPos();
+    r = box.dist(*v, pos);
+    energy += pair->compute(neighbourList[i]->getType(), pairType, r);
   }
   return energy;
 }
@@ -484,3 +511,4 @@ void PolymerMC::generateBead(const Vec& v1, const Vec& v2, const Vec& v3,
 
   *energy = bondEnergy + angleEnergy + torsionEnergy;
 }
+

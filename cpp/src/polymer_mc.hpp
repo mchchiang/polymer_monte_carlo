@@ -13,6 +13,7 @@
 #include <map>
 #include <set>
 #include <random>
+#include "box.hpp"
 #include "bead.hpp"
 #include "bond.hpp"
 #include "bond_distrb.hpp"
@@ -33,7 +34,8 @@
 class PolymerMC {
 
 private:
-	double lx, ly, lz;
+  Box box;
+
 	int chainSize;
 	int seed;
 
@@ -59,6 +61,7 @@ private:
 
 	std::vector<Vec> trialPos;
 	std::vector<Vec> trialCoords;
+	std::vector<int*> trialImage;
 	std::vector<double> trialProbs;
 	std::vector<double> trialBondEnergy;
 	std::vector<double> trialNonBondEnergy;
@@ -138,6 +141,7 @@ public:
   void deleteWall(const std::string& wallID);
 
   void setNeighbourListCutoff(double cutoff);
+
 };
 
 
