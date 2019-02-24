@@ -101,7 +101,9 @@ private:
 	Mat getRotateMatrix(double theta, double phi);
 
 public:
-	PolymerMC(double boxSize, int chainSize, int seed, int ntrials);
+	PolymerMC(int chainSize, double xlo, double xhi, double ylo, double yhi,
+	          double zlo, double zhi, bool xBound, bool yBound, bool zBound,
+	          int ntrials, int seed);
 	~PolymerMC();
 
 	void generateBead(const Vec& v1, const Vec& v2, const Vec& v3,

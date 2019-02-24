@@ -29,9 +29,11 @@ using std::endl;
 using std::ofstream;
 using std::stringstream;
 
-PolymerMC::PolymerMC(double boxSize, int _chainSize, int _seed, int _ntrials) :
-  box {Box(-boxSize*0.5, boxSize*0.5, -boxSize*0.5, boxSize*0.5,
-            -boxSize*0.5, boxSize*0.5, true, true, false)},
+PolymerMC::PolymerMC(int _chainSize, double xlo, double xhi,
+                     double ylo, double yhi, double zlo, double zhi,
+                     bool xBound, bool yBound, bool zBound,
+                     int _ntrials, int _seed) :
+  box {Box(xlo, xhi, ylo, yhi, zlo, zhi, xBound, yBound, zBound)},
   rand {RandomDouble(_seed, 0.0, 1.0)} {
 
   chainSize = _chainSize;
