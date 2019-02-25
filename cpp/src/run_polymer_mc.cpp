@@ -28,9 +28,11 @@ bool readBondPotential(const vector<string>& args, string* name,
                         int* seed, vector<double>* numargs);
 bool readNonBondPotential(const vector<string>& args, string* name,
                            vector<double>* numargs);
-bool readWallPotential(const vector<string>& args, string *id, string *group,
-                       string *name, int* dir, double* pos, bool* fromBelow,
+bool readWallPotential(const vector<string>& args, string* id, string* group,
+                       string* name, int* dir, double* pos, bool* fromBelow,
                        vector<double>* numargs);
+bool readDump(const vector<string>& args, string* id, string* group,
+              string* name, string* filename, int* freq);
 
 
 int main (int argc, char* argv[]) {
@@ -84,7 +86,16 @@ int main (int argc, char* argv[]) {
 
     // Determine the keyword
     keyword = tokens[0];
-    if (keyword.compare("bead") == 0) {
+    if (keyword.compare("seed") == 0) {
+      cout << "Reading generator seed ..." << endl;
+      readOK = readInt(tokens, &seed, &hasReadSeed);
+      if (!readOK) {
+        cout << "Error: Incorrect parameters for random generator seed" << endl;
+        cout << "Expect: seed [seed]" << endl;
+        return 1;
+      }
+    } else if (keyword.compare("bead") == 0) {
+      cout << "Reading number of beads ..." << endl;
       readOK = readInt(tokens, &nbeads, &hasReadBead);
       if (!readOK) {
         cout << "Error: Incorrect parameters for number of beads" << endl;
@@ -92,6 +103,7 @@ int main (int argc, char* argv[]) {
         return 1;
       }
     } else if (keyword.compare("box") == 0) {
+      cout << "Reading box size ..." << endl;
       readOK = readBox(tokens, boxLo, boxHi, bound, hasReadBox);
       if (!readOK) {
         cout << "Error: Incorrect parameters for box size" << endl;
@@ -99,17 +111,11 @@ int main (int argc, char* argv[]) {
         return 1;
       }
     } else if (keyword.compare("trial") == 0) {
+      cout << "Reading number of trials ..." << endl;
       readOK = readInt(tokens, &ntrials, &hasReadTrial);
       if (!readOK) {
         cout << "Error: Incorrect parameters for number of trials" << endl;
         cout << "Expect: trial [ntrials]" << endl;
-        return 1;
-      }
-    } else if (keyword.compare("seed") == 0) {
-      readOK = readInt(tokens, &seed, &hasReadSeed);
-      if (!readOK) {
-        cout << "Error: Incorrect parameters for random generator seed" << endl;
-        cout << "Expect: seed [seed]" << endl;
         return 1;
       }
     }
@@ -139,8 +145,9 @@ int main (int argc, char* argv[]) {
   bool hasReadAngle {false};
   bool hasReadPair {false};
   bool hasReadTimesteps {false};
+  bool hasReadEquil {false};
 
-  int potSeed, timesteps;
+  int potSeed, timesteps, nequil {};
   string potName;
   vector<double> potArgs {};
   while (!input.eof()) {
@@ -212,7 +219,15 @@ int main (int argc, char* argv[]) {
         cout << "Expect: run [time steps] " << endl;
         return 1;
       }
-    } else if (keyword.compare("neighbour_cutoff") == 0) {
+    } else if (keyword.compare("equil") == 0) {
+      readOK = readInt(tokens, &nequil, &hasReadEquil);
+      if (!readOK) {
+        cout << "Error: Incorrect parameters for equilibration timesteps"
+            << endl;
+        cout << "Expect: equil [time steps] " << endl;
+        return 1;
+      }
+    }else if (keyword.compare("neighbour_cutoff") == 0) {
       double cutoff {};
       bool read {};
       readOK = readDouble(tokens, &cutoff, &read);
@@ -222,6 +237,17 @@ int main (int argc, char* argv[]) {
         return 1;
       }
       sim->setNeighbourListCutoff(cutoff);
+    } else if (keyword.compare("dump") == 0) {
+      string filename {}, group {}, id {}, dumpType {};
+      int freq {};
+      readOK = readDump(tokens, &id, &group, &dumpType, &filename, &freq);
+      if (!readOK) {
+        cout << "Error: Incorrect parameters for dump" << endl;
+        cout << "Expect: dump [id] [group] [dump type] [freq] [filename]"
+             << endl;
+        return 1;
+      }
+      sim->dump(id, group, dumpType, filename, freq);
     }
   }
 
@@ -238,9 +264,14 @@ int main (int argc, char* argv[]) {
     cout << "Default is pair_none" << endl;
   }
 
+  if (!hasReadEquil) {
+    cout << "Warning: No equilibration timesteps specified" << endl;
+    cout << "Default is equil = 0" << endl;
+  }
+
   if (hasReadTimesteps) {
     cout << "Starting simulation ..." << endl;
-    sim->run(0,timesteps,10);
+    sim->run(nequil,timesteps);
   }
   delete sim;
 }
@@ -344,6 +375,17 @@ bool readWallPotential(const vector<string>& args, string *id, string *group,
   for (size_t i {}; i < numargs->size(); i++) {
     (*numargs)[i] = stod(args[i+7], nullptr);
   }
+  return true;
+}
+
+bool readDump(const vector<string>& args, string* id, string* group,
+              string* name, string* filename, int* freq) {
+  if (args.size() < 6) return false;
+  *id = args[1];
+  *group = args[2];
+  *name = args[3];
+  *freq = stoi(args[4], nullptr, 10);
+  *filename = args[5];
   return true;
 }
 

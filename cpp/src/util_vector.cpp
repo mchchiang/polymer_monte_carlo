@@ -39,12 +39,41 @@ Vec Vec::operator -(const Vec& v) const {
   return Vec(vec[0] - v.vec[0], vec[1] - v.vec[1],vec[2] - v.vec[2]);
 }
 
+
 Vec Vec::operator *(double a) const {
   return Vec(a*vec[0], a*vec[1], a*vec[2]);
 }
 
 Vec Vec::operator /(double a) const {
   return Vec(vec[0]/a, vec[1]/a, vec[2]/a);
+}
+
+Vec& Vec::operator +=(const Vec& v) {
+  vec[0] += v.vec[0];
+  vec[1] += v.vec[1];
+  vec[2] += v.vec[2];
+  return *this;
+}
+
+Vec& Vec::operator -=(const Vec& v) {
+  vec[0] -= v.vec[0];
+  vec[1] -= v.vec[1];
+  vec[2] -= v.vec[2];
+  return *this;
+}
+
+Vec& Vec::operator *=(double a) {
+  vec[0] *= a;
+  vec[1] *= a;
+  vec[2] *= a;
+  return *this;
+}
+
+Vec& Vec::operator /=(double a) {
+  vec[0] /= a;
+  vec[1] /= a;
+  vec[2] /= a;
+  return *this;
 }
 
 double Vec::mag(const Vec& a) {

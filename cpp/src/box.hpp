@@ -28,9 +28,9 @@ public:
   void wrapPos(Vec* v, int* image);
   void unwrapPos(Vec* v, int* image);
 
-  double getBoxHi(int comp);
-  double getBoxLo(int comp);
-  double getBoxSize(int comp);
+  double getBoxHi(int comp) const;
+  double getBoxLo(int comp) const;
+  double getBoxSize(int comp) const;
 
 };
 

@@ -30,6 +30,8 @@
 #include "wall_factory.hpp"
 #include "util_random.hpp"
 #include "util_vector.hpp"
+#include "dump.hpp"
+#include "dump_factory.hpp"
 
 class PolymerMC {
 
@@ -54,6 +56,7 @@ private:
   double oldLogRosenbluth;
 
 	std::vector<Bead> chains[2];
+	std::vector<Vec> chainCoords[2];
 	std::vector<Bead*> neighbourList;
 	std::vector<int> bondType;
 	std::vector<int> angleType;
@@ -85,6 +88,8 @@ private:
 	Torsion* torsionNone;
 	Pair* pair;
 	std::map<std::string, Wall*> walls;
+	std::map<std::string, Dump*> dumps;
+	DumpFactory dumpFactory;
 
   BondDistribution* distrbBond;
   AngleDistribution* distrbAngle;
@@ -119,7 +124,7 @@ public:
 	                            int beadIndex, const Vec& pos);
 	double computeWallEnergy(unsigned int beadMask, const Vec& pos);
 
-	void run(int nequil, int nsteps, int nsample);
+	void run(int nequil, int nsteps);
 	void mcstep(int isteps);
 
   void setBond(const std::string& bondName,
@@ -134,7 +139,8 @@ public:
   void setAngleType(int type);
   void setTorsionType(int type);
 
-  void createGroupWith(const std::string& groupName, const std::set<int>& types);
+  void createGroupWith(const std::string& groupName,
+                       const std::set<int>& types);
   void deleteGroup(const std::string& groupName);
 
   void createWall(const std::string& wallID, const std::string& groupName,
@@ -142,7 +148,17 @@ public:
                   bool fromBelow, const std::vector<double>& args);
   void deleteWall(const std::string& wallID);
 
+  void dump(const std::string& dumpID, const std::string& groupName,
+            const std::string& dumpType, const std::string& filename,
+            int freq);
+
+  void undump(const std::string& dumpID);
+
   void setNeighbourListCutoff(double cutoff);
+
+  const Bead& getBead(int index) const;
+  int getNumOfBeads() const;
+  double getBoxSize(int comp) const;
 
 };
 

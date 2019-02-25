@@ -30,6 +30,10 @@ public:
   Vec operator -(const Vec& v) const;
   Vec operator *(double a) const;
   Vec operator /(double a) const;
+  Vec& operator +=(const Vec& v);
+  Vec& operator -=(const Vec& v);
+  Vec& operator *=(double a);
+  Vec& operator /=(double a);
 
   static double mag(const Vec& a);
   static double mag2(const Vec& a);

@@ -95,14 +95,14 @@ void Box::unwrapPos(Vec* v, int* image) {
   }
 }
 
-double Box::getBoxHi(int comp) {
+double Box::getBoxHi(int comp) const {
   return boxHi[comp];
 }
 
-double Box::getBoxLo(int comp) {
+double Box::getBoxLo(int comp) const {
   return boxLo[comp];
 }
 
-double Box::getBoxSize(int comp) {
+double Box::getBoxSize(int comp) const {
   return boxSize[comp];
 }
