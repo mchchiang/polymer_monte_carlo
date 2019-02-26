@@ -55,6 +55,8 @@ private:
   double newLogRosenbluth;
   double oldLogRosenbluth;
 
+  double newNonBondEnergy;
+  double oldNonBondEnergy;
 	std::vector<Bead> chains[2];
 	std::vector<Vec> chainCoords[2];
 	std::vector<Bead*> neighbourList;
@@ -117,11 +119,12 @@ public:
 
 	void growNewChain();
 	void traceOldChain();
-	void buildNeighbourList(std::vector<Bead>& chain,
-	                        int beadIndex, double cutoff);
+	void buildNeighbourList(std::vector<Bead>& chain, int beadIndex,
+	                        double cutoff, std::vector<Bead*>* list);
 
 	double computeNonBondEnergy(std::vector<Bead>& chain, int pairType,
-	                            int beadIndex, const Vec& pos);
+	                            const Vec& pos, std::vector<Bead*>& list,
+	                            Pair& pairPotential);
 	double computeWallEnergy(unsigned int beadMask, const Vec& pos);
 
 	void run(int nequil, int nsteps);
@@ -156,6 +159,7 @@ public:
 
   void setNeighbourListCutoff(double cutoff);
 
+  Bead& getBead(int index);
   const Bead& getBead(int index) const;
   int getNumOfBeads() const;
   double getBoxSize(int comp) const;

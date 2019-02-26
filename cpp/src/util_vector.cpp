@@ -5,6 +5,7 @@
  *      Author: michaelchiang
  */
 
+#include <cmath>
 #include "util_vector.hpp"
 
 Vec::Vec() : Vec(0,0,0) {}
@@ -128,6 +129,15 @@ Mat::Mat(const Mat& m) {
     }
   }
 }
+
+Mat::Mat(Vec v[3]) {
+  for (int i {}; i < 3; i++) {
+    for (int j {}; j < 3; j++) {
+      mat[i][j] = v[i][j];
+    }
+  }
+}
+
 Mat::~Mat() {}
 
 Mat& Mat::operator =(const Mat& m) {

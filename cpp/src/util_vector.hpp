@@ -8,8 +8,6 @@
 #ifndef UTIL_VECTOR_HPP_
 #define UTIL_VECTOR_HPP_
 
-#include <cmath>
-
 class Vec {
 
 private:
@@ -54,6 +52,7 @@ public:
 
   Mat();
   Mat(const Mat& m);
+  Mat(Vec v[3]);
   ~Mat();
 
   Vec& operator [](const int& i);

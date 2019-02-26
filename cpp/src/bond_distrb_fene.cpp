@@ -23,7 +23,7 @@ using FENEDistrb = BondDistributionFENE;
 FENEDistrb::BondDistributionFENE(int _ntypes, double _temp,
                                  int seed, BondFENE* fene) :
   BondDistribution{seed}, feneBond {fene}, temp {_temp}, ntypes {_ntypes} {
-  nbins = 1000;
+  nbins = 10000;
   binsize = 1.0 / static_cast<double>(nbins);
   invcdf = vector<Data>(ntypes);
 

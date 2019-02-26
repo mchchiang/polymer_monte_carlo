@@ -5,6 +5,7 @@
  *      Author: michaelchiang
  */
 
+#include <cmath>
 #include "box.hpp"
 #include "util_vector.hpp"
 

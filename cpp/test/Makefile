@@ -28,6 +28,7 @@ all : $(LOBJ) $(OBJ) $(BIN)
 
 $(ODIR)/%.o : %.cpp 
 	mkdir -p $(ODIR)
+#	rm ../bin/obj/run_polymer_mc.o
 	$(CXX) $(CXXFLAGS) $(INC) -o $@ -c $<
 
 $(EDIR)/% : $(ODIR)/%.o $(LOBJ) $(OBJ)
