@@ -64,6 +64,7 @@ private:
 	std::vector<int> angleType;
 	std::vector<int> torsionType;
 
+	Vec startPos;
 	std::vector<Vec> trialPos;
 	std::vector<Vec> trialCoords;
 	std::vector<int*> trialImage;
@@ -122,9 +123,8 @@ public:
 	void buildNeighbourList(std::vector<Bead>& chain, int beadIndex,
 	                        double cutoff, std::vector<Bead*>* list);
 
-	double computeNonBondEnergy(std::vector<Bead>& chain, int pairType,
-	                            const Vec& pos, std::vector<Bead*>& list,
-	                            Pair& pairPotential);
+	double computeNonBondEnergy(int pairType, const Vec& pos,
+	                            std::vector<Bead*>& list, Pair& pairPotential);
 	double computeWallEnergy(unsigned int beadMask, const Vec& pos);
 
 	void run(int nequil, int nsteps);
@@ -158,6 +158,8 @@ public:
   void undump(const std::string& dumpID);
 
   void setNeighbourListCutoff(double cutoff);
+
+  void setStartPos(const Vec& v);
 
   Bead& getBead(int index);
   const Bead& getBead(int index) const;

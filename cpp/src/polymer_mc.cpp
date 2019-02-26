@@ -102,6 +102,7 @@ PolymerMC::PolymerMC(int _chainSize, double xlo, double xhi,
   walls = std::map<std::string, Wall*>();
   dumps = std::map<std::string, Dump*>();
 
+  startPos = Vec(0.0, 0.0, 0.0);
   trialPos = vector<Vec>(ntrials, Vec(0.0, 0.0, 0.0));
   trialCoords = vector<Vec>(ntrials, Vec(0.0, 0.0, 0.0));
   trialImage = vector<int*>(ntrials);
@@ -312,7 +313,7 @@ void PolymerMC::mcstep(int istep) {
     if (hasOldChain) traceOldChain();
     logP = log(rand.nextDouble());
     logRatio = newLogRosenbluth - oldLogRosenbluth;
-    cout << istep << " " << newNonBondEnergy << " " << oldNonBondEnergy << endl;
+    cout << istep << " " << newLogRosenbluth << " " << oldLogRosenbluth << endl;
     if (logRatio > 0.0 || logP < logRatio) { // New config is accepted
       hasOldChain = true;
       oldChainIndex = (oldChainIndex == 0 ? 1 : 0);
@@ -327,7 +328,7 @@ void PolymerMC::growNewChain() {
   newLogRosenbluth = 0.0;
   newNonBondEnergy = 0.0;
 
-  chains[newChainIndex][0].pos = {0.0, 0.0, box.getBoxHi(2)};
+  chains[newChainIndex][0].pos = startPos;
 
   int btype, atype, ttype, ptype;
   unsigned int beadMask;
@@ -369,8 +370,7 @@ void PolymerMC::growNewChain() {
       box.wrapPos(&trialPos[k], trialImage[k]);
 
       trialNonBondEnergy[k] =
-          computeNonBondEnergy(chains[newChainIndex], ptype, trialPos[k],
-                               neighbourList, *pair);
+          computeNonBondEnergy(ptype, trialPos[k], neighbourList, *pair);
       trialNonBondEnergy[k] += computeWallEnergy(beadMask, trialPos[k]);
       expEnergy = exp(-trialNonBondEnergy[k]/temp);
       trialProbs[k] = expEnergy;
@@ -454,8 +454,7 @@ void PolymerMC::traceOldChain() {
     double expEnergy {};
 
     trialNonBondEnergy[0] =
-        computeNonBondEnergy(chains[oldChainIndex], ptype, trialPos[0],
-                             neighbourList, *pair);
+        computeNonBondEnergy(ptype, trialPos[0], neighbourList, *pair);
     trialNonBondEnergy[0] += computeWallEnergy(beadMask, trialPos[0]);
     oldNonBondEnergy += trialNonBondEnergy[0];
     expEnergy = exp(-trialNonBondEnergy[0]/temp);
@@ -483,8 +482,7 @@ void PolymerMC::traceOldChain() {
       box.wrapPos(&trialPos[k], trialImage[k]);
 
       trialNonBondEnergy[k] =
-          computeNonBondEnergy(chains[oldChainIndex], ptype, trialPos[k],
-                               neighbourList, *pair);
+          computeNonBondEnergy(ptype, trialPos[k], neighbourList, *pair);
       trialNonBondEnergy[k] += computeWallEnergy(beadMask, trialPos[k]);
       expEnergy = exp(-trialNonBondEnergy[k]/temp);
       weight += expEnergy;
@@ -507,8 +505,8 @@ void PolymerMC::buildNeighbourList(vector<Bead>& chain,
   }
 }
 
-double PolymerMC::computeNonBondEnergy(vector<Bead>& chain, int pairType,
-                                       const Vec& pos, vector<Bead*>& list,
+double PolymerMC::computeNonBondEnergy(int pairType, const Vec& pos,
+                                       vector<Bead*>& list,
                                        Pair& pairPotential) {
   double energy {};
   for (size_t i {}; i < list.size(); i++) {
@@ -551,6 +549,10 @@ void PolymerMC::generateBead(const Vec& v1, const Vec& v2, const Vec& v3,
   (*coords)[2] = phi;
 
   *energy = bondEnergy + angleEnergy + torsionEnergy;
+}
+
+void PolymerMC::setStartPos(const Vec& v) {
+  startPos = v;
 }
 
 Bead& PolymerMC::getBead(int index) {

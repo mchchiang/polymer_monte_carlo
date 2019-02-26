@@ -33,6 +33,7 @@ bool readWallPotential(const vector<string>& args, string* id, string* group,
                        vector<double>* numargs);
 bool readDump(const vector<string>& args, string* id, string* group,
               string* name, string* filename, int* freq);
+bool readVec(const vector<string>& args, Vec* v);
 
 
 int main (int argc, char* argv[]) {
@@ -248,6 +249,15 @@ int main (int argc, char* argv[]) {
         return 1;
       }
       sim->dump(id, group, dumpType, filename, freq);
+    } else if (keyword.compare("start_pos") == 0) {
+      Vec v {};
+      readOK = readVec(tokens, &v);
+      if (!readOK) {
+        cout << "Error: Incorrect parameters for start_pos" << endl;
+        cout << "Expect: start_pos [x] [y] [z]" << endl;
+        return 1;
+      }
+      sim->setStartPos(v);
     }
   }
 
@@ -386,6 +396,15 @@ bool readDump(const vector<string>& args, string* id, string* group,
   *name = args[3];
   *freq = stoi(args[4], nullptr, 10);
   *filename = args[5];
+  return true;
+}
+
+bool readVec(const vector<string>& args, Vec* v) {
+  if (args.size() != 4) return false;
+  double x {stod(args[1], nullptr)};
+  double y {stod(args[2], nullptr)};
+  double z {stod(args[3], nullptr)};
+  *v = Vec(x,y,z);
   return true;
 }
 
