@@ -21,10 +21,10 @@ BOOST_AUTO_TEST_CASE(TestGenerate) {
   BondFENE fene {1, 1.0, 1.0, 30.0, 1.6};
   BondDistributionFENE distrbFene {1, 1.0, 6732, &fene};
   Vec v {};
-  double value {}, energy {};
+  double value {};
   int npoints {100000};
   for (int i {}; i < npoints; i++) {
-    distrbFene.generate(0, v, &value, &energy);
+    value = distrbFene.generate(0);
     writer << value << endl;
   }
   writer.close();

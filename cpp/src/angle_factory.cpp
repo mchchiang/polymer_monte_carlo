@@ -12,7 +12,7 @@
 #include "angle.hpp"
 #include "angle_cosine.hpp"
 #include "angle_none.hpp"
-#include "angle_distrb.hpp"
+#include "distrb.hpp"
 #include "angle_distrb_cosine.hpp"
 #include "angle_distrb_uniform.hpp"
 
@@ -20,7 +20,7 @@ using std::pair;
 using std::string;
 using std::vector;
 using std::make_pair;
-using AnglePair = std::pair<Angle*, AngleDistribution*>;
+using AnglePair = std::pair<Angle*, Distribution*>;
 
 AnglePair AngleFactory::createAngleCosine(int ntypes, double k,
                                           double temp, int seed) {

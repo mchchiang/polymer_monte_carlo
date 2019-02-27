@@ -9,12 +9,12 @@
 #define BOND_DISTRB_FENE_HPP_
 
 #include <vector>
-#include "bond_distrb.hpp"
+#include "distrb.hpp"
 #include "bond_fene.hpp"
 #include "util_vector.hpp"
 #include "util_numeric.hpp"
 
-class BondDistributionFENE : public BondDistribution {
+class BondDistributionFENE : public Distribution {
 
 private:
   BondFENE* feneBond;
@@ -27,7 +27,7 @@ private:
 public:
   BondDistributionFENE(int ntypes, double temp, int seed, BondFENE* bond);
   ~BondDistributionFENE();
-  void generate(int bondType, const Vec& v1, double* value, double* energy);
+  double generate(int type);
 
 };
 

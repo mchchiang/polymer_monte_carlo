@@ -9,6 +9,7 @@
 #include <vector>
 #include <functional>
 #include <iostream>
+#include "distrb.hpp"
 #include "bond_distrb_fene.hpp"
 #include "bond_fene.hpp"
 #include "util_vector.hpp"
@@ -22,7 +23,7 @@ using FENEDistrb = BondDistributionFENE;
 
 FENEDistrb::BondDistributionFENE(int _ntypes, double _temp,
                                  int seed, BondFENE* fene) :
-  BondDistribution{seed}, feneBond {fene}, temp {_temp}, ntypes {_ntypes} {
+  Distribution{seed}, feneBond {fene}, temp {_temp}, ntypes {_ntypes} {
   nbins = 10000;
   binsize = 1.0 / static_cast<double>(nbins);
   invcdf = vector<Data>(ntypes);
@@ -57,19 +58,15 @@ FENEDistrb::BondDistributionFENE(int _ntypes, double _temp,
 
 FENEDistrb::~BondDistributionFENE() {}
 
-void FENEDistrb::generate(int type, const Vec& v1,
-                          double* value, double* energy) {
+double FENEDistrb::generate(int type) {
   double r {nextRand()};
   int i {static_cast<int>(floor(r / static_cast<double>(binsize)))};
-  double result {};
   if (i < 0) {
-    result = invcdf[type].y[0];
+    return invcdf[type].y[0];
   } else if (i >= nbins-1) {
-    result = invcdf[type].y[nbins-1];
+    return invcdf[type].y[nbins-1];
   } else {
-    result = linearInterpolate(invcdf[type].x[i], invcdf[type].x[i+1],
+    return linearInterpolate(invcdf[type].x[i], invcdf[type].x[i+1],
                                invcdf[type].y[i], invcdf[type].y[i+1], r);
   }
-  *value = result;
-  *energy = feneBond->compute(type, r);
 }

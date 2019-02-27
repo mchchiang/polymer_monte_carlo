@@ -22,6 +22,7 @@ protected:
   double nextRand() {return rand(mt);}
 public:
   virtual ~Distribution() {}
+  virtual double generate(int type) = 0;
 };
 
 #endif /* DISTRB_HPP_ */

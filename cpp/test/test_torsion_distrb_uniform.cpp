@@ -19,10 +19,10 @@ BOOST_AUTO_TEST_CASE(TestGenerate) {
   writer.open("TestTorsionDistributionUniform.dat");
   TorsionDistributionUniform distrb {67343};
   Vec v {};
-  double value {}, energy {};
+  double value {};
   int npoints {100000};
   for (int i {}; i < npoints; i++) {
-    distrb.generate(0, v, v, v, &value, &energy);
+    value = distrb.generate(0);
     writer << value << endl;
   }
   writer.close();

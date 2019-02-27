@@ -16,14 +16,12 @@
 #include "box.hpp"
 #include "bead.hpp"
 #include "bond.hpp"
-#include "bond_distrb.hpp"
 #include "bond_factory.hpp"
 #include "angle.hpp"
-#include "angle_distrb.hpp"
 #include "angle_factory.hpp"
 #include "torsion.hpp"
-#include "torsion_distrb.hpp"
 #include "torsion_factory.hpp"
+#include "distrb.hpp"
 #include "pair.hpp"
 #include "pair_factory.hpp"
 #include "wall.hpp"
@@ -38,16 +36,16 @@ class PolymerMC {
 private:
   Box box;
 
-	int chainSize;
-	int seed;
+  int chainSize;
+  int seed;
 
-	int ntrials;
-	double temp;
+  int ntrials;
+  double temp;
 
-	int numOfBeadTypes;
-	int numOfBondTypes;
-	int numOfAngleTypes;
-	int numOfTorsionTypes;
+  int numOfBeadTypes;
+  int numOfBondTypes;
+  int numOfAngleTypes;
+  int numOfTorsionTypes;
 
   int newChainIndex;
   int oldChainIndex;
@@ -57,78 +55,77 @@ private:
 
   double newNonBondEnergy;
   double oldNonBondEnergy;
-	std::vector<Bead> chains[2];
-	std::vector<Vec> chainCoords[2];
-	std::vector<Bead*> neighbourList;
-	std::vector<int> bondType;
-	std::vector<int> angleType;
-	std::vector<int> torsionType;
+  std::vector<Bead> chains[2];
+  std::vector<Vec> chainCoords[2];
+  std::vector<Bead*> neighbourList;
+  std::vector<int> bondType;
+  std::vector<int> angleType;
+  std::vector<int> torsionType;
 
-	Vec startPos;
-	std::vector<Vec> trialPos;
-	std::vector<Vec> trialCoords;
-	std::vector<int*> trialImage;
-	std::vector<double> trialProbs;
-	std::vector<double> trialBondEnergy;
-	std::vector<double> trialNonBondEnergy;
+  Vec startPos;
+  std::vector<Vec> trialPos;
+  std::vector<Vec> trialCoords;
+  std::vector<int*> trialImage;
+  std::vector<double> trialProbs;
+  std::vector<double> trialBondEnergy;
+  std::vector<double> trialNonBondEnergy;
 
-	int numOfGroups;
-	std::map<std::string,unsigned int> groups;
+  int numOfGroups;
+  std::map<std::string,unsigned int> groups;
 
-	double neighbourListCutoff;
-	bool hasOldChain;
+  double neighbourListCutoff;
+  bool hasOldChain;
 
-	BondFactory bondFactory;
-	AngleFactory angleFactory;
-	TorsionFactory torsionFactory;
-	PairFactory pairFactory;
-	WallFactory wallFactory;
+  BondFactory bondFactory;
+  AngleFactory angleFactory;
+  TorsionFactory torsionFactory;
+  PairFactory pairFactory;
+  WallFactory wallFactory;
 
-	Bond* bond;
-	Angle* angle;
-	Angle* angleNone;
-	Torsion* torsion;
-	Torsion* torsionNone;
-	Pair* pair;
-	std::map<std::string, Wall*> walls;
-	std::map<std::string, Dump*> dumps;
-	DumpFactory dumpFactory;
+  Bond* bond;
+  Angle* angle;
+  Angle* angleNone;
+  Torsion* torsion;
+  Torsion* torsionNone;
+  Pair* pair;
+  std::map<std::string, Wall*> walls;
+  std::map<std::string, Dump*> dumps;
+  DumpFactory dumpFactory;
 
-  BondDistribution* distrbBond;
-  AngleDistribution* distrbAngle;
-  AngleDistribution* distrbAngleUni;
-  TorsionDistribution* distrbTorsion;
-  TorsionDistribution* distrbTorsionUni;
+  Distribution* distrbBond;
+  Distribution* distrbAngle;
+  Distribution* distrbAngleUni;
+  Distribution* distrbTorsion;
+  Distribution* distrbTorsionUni;
 
-	RandomDouble rand;
+  RandomDouble rand;
 
-	// For coordinate transformation
-	Mat rotate;
+  // For coordinate transformation
+  Mat rotate;
 
-	// Helper functions
-	Mat getRotateMatrix(double theta, double phi);
+  // Helper functions
+  Mat getRotateMatrix(double theta, double phi);
 
 public:
-	PolymerMC(int chainSize, double xlo, double xhi, double ylo, double yhi,
-	          double zlo, double zhi, bool xBound, bool yBound, bool zBound,
-	          int ntrials, int seed);
-	~PolymerMC();
+  PolymerMC(int chainSize, double xlo, double xhi, double ylo, double yhi,
+            double zlo, double zhi, bool xBound, bool yBound, bool zBound,
+            int ntrials, int seed);
+  ~PolymerMC();
 
-	void generateBead(const Vec& v1, const Vec& v2, const Vec& v3,
-	                  int bondType, int angleType, int torsionType,
-	                  int beadIndex, Vec* pos, double* energy);
+  Vec generateCoords(int bondType, int angleType, int torsionType,
+                     int beadIndex);
 
-	void growNewChain();
-	void traceOldChain();
-	void buildNeighbourList(std::vector<Bead>& chain, int beadIndex,
-	                        double cutoff, std::vector<Bead*>* list);
+  void growNewChain();
+  void traceOldChain();
+  void buildNeighbourList(std::vector<Bead>& chain, int beadIndex,
+                          double cutoff, std::vector<Bead*>* list);
 
-	double computeNonBondEnergy(int pairType, const Vec& pos,
-	                            std::vector<Bead*>& list, Pair& pairPotential);
-	double computeWallEnergy(unsigned int beadMask, const Vec& pos);
+  double computeNonBondEnergy(int pairType, const Vec& pos,
+                              std::vector<Bead*>& list, Pair& pairPotential);
+  double computeWallEnergy(unsigned int beadMask, const Vec& pos);
 
-	void run(int nequil, int nsteps);
-	void mcstep(int isteps);
+  void run(int nequil, int nsteps);
+  void mcstep(int isteps);
 
   void setBond(const std::string& bondName,
                const std::vector<double>& args, int seed);

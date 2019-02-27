@@ -12,7 +12,7 @@
 #include "bond.hpp"
 #include "bond_fene.hpp"
 #include "bond_none.hpp"
-#include "bond_distrb.hpp"
+#include "distrb.hpp"
 #include "bond_distrb_fene.hpp"
 #include "bond_distrb_fixed.hpp"
 
@@ -20,7 +20,7 @@ using std::pair;
 using std::string;
 using std::vector;
 using std::make_pair;
-using BondPair = std::pair<Bond*, BondDistribution*>;
+using BondPair = std::pair<Bond*, Distribution*>;
 
 BondPair BondFactory::createBondFENE(int ntypes, double epsilon, double sigma,
                                      double kf, double r0, double temp,

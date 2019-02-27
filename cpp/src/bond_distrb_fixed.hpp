@@ -8,21 +8,20 @@
 #ifndef BOND_DISTRB_FIXED_HPP_
 #define BOND_DISTRB_FIXED_HPP_
 
-#include "bond_distrb.hpp"
+#include "distrb.hpp"
 #include "util_vector.hpp"
 
-class BondDistributionFixed : public BondDistribution {
+class BondDistributionFixed : public Distribution {
 
 private:
   double length;
 
 public:
   BondDistributionFixed(int seed, double len) :
-    BondDistribution(seed), length {len} {}
+    Distribution(seed), length {len} {}
   ~BondDistributionFixed() {}
-  void generate(int type, const Vec& v1, double* value, double* energy) {
-    *value = length;
-    *energy = 0.0;
+  double generate(int type) {
+    return length;
   }
 
 };

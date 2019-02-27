@@ -12,19 +12,19 @@
 #include <string>
 #include <vector>
 #include "bond.hpp"
-#include "bond_distrb.hpp"
+#include "distrb.hpp"
 
 
 class BondFactory {
 
 private:
-  std::pair<Bond*,BondDistribution*>
+  std::pair<Bond*,Distribution*>
   createBondFENE(int ntypes, double epsilon, double sigma,
                  double kf, double r0, double temp, int seed);
-  std::pair<Bond*,BondDistribution*> createBondFixed(int length);
+  std::pair<Bond*,Distribution*> createBondFixed(int length);
 
 public:
-  std::pair<Bond*,BondDistribution*> createBond(
+  std::pair<Bond*,Distribution*> createBond(
       std::string, int ntypes, const std::vector<double>& args,
         double temp, int seed);
 };

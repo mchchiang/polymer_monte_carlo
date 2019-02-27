@@ -9,17 +9,15 @@
 #define TORSION_DISTRB_UNIFORM_HPP_
 
 #include <cmath>
-#include "torsion_distrb.hpp"
+#include "distrb.hpp"
 #include "util_vector.hpp"
 
-class TorsionDistributionUniform : public TorsionDistribution {
+class TorsionDistributionUniform : public Distribution {
 public:
-  TorsionDistributionUniform(int seed) : TorsionDistribution(seed) {}
+  TorsionDistributionUniform(int seed) : Distribution{seed} {}
   ~TorsionDistributionUniform() {}
-  void generate(int torsionType, const Vec& v1, const Vec& v2, const Vec& v3,
-                double* value, double* energy) {
-    *value = nextRand()*2.0*M_PI;
-    *energy = 0.0;
+  double generate(int type) {
+    return nextRand()*2.0*M_PI;
   }
 };
 

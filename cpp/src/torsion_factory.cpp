@@ -11,14 +11,14 @@
 #include "torsion_factory.hpp"
 #include "torsion.hpp"
 #include "torsion_none.hpp"
-#include "torsion_distrb.hpp"
+#include "distrb.hpp"
 #include "torsion_distrb_uniform.hpp"
 
 using std::pair;
 using std::string;
 using std::vector;
 using std::make_pair;
-using TorsionPair = std::pair<Torsion*, TorsionDistribution*>;
+using TorsionPair = std::pair<Torsion*, Distribution*>;
 
 TorsionPair TorsionFactory::createTorsionNone(int seed) {
   TorsionNone* torsion {new TorsionNone()};

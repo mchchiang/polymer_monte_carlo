@@ -12,16 +12,16 @@
 #include <string>
 #include <vector>
 #include "torsion.hpp"
-#include "torsion_distrb.hpp"
+#include "distrb.hpp"
 
 
 class TorsionFactory {
 
 private:
-  std::pair<Torsion*,TorsionDistribution*> createTorsionNone(int seed);
+  std::pair<Torsion*,Distribution*> createTorsionNone(int seed);
 
 public:
-  std::pair<Torsion*,TorsionDistribution*> createTorsion(
+  std::pair<Torsion*,Distribution*> createTorsion(
       std::string torsionName, int ntypes, const std::vector<double>& params,
         double temp, int seed);
 };

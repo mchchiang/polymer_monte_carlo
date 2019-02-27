@@ -318,6 +318,7 @@ void PolymerMC::mcstep(int istep) {
       hasOldChain = true;
       oldChainIndex = (oldChainIndex == 0 ? 1 : 0);
       newChainIndex = (newChainIndex == 0 ? 1 : 0);
+      //cout << istep << " " << oldChainIndex << " " << newChainIndex << endl;
       accepted = true;
     }
   }
@@ -332,12 +333,10 @@ void PolymerMC::growNewChain() {
 
   int btype, atype, ttype, ptype;
   unsigned int beadMask;
-  Vec v1, v2, v3;
+  Vec prev;
 
   for (int i {1}; i < chainSize; i++) {
-    v1 = chains[newChainIndex][i-1].pos;
-    v2 = (i == 1 ? v1 : chains[newChainIndex][i-2].pos);
-    v3 = (i <= 2 ? v2 : chains[newChainIndex][i-3].pos);
+    prev = chains[newChainIndex][i-1].pos;
     btype = bondType[i];
     atype = angleType[i];
     ttype = torsionType[i];
@@ -349,8 +348,7 @@ void PolymerMC::growNewChain() {
     double expEnergy {};
     double weight {}; // Rosenbluth weight
     for (int k {}; k < ntrials; k++) {
-      generateBead(v1, v2, v3, btype, atype, ttype,
-                   i, &trialCoords[k], &trialBondEnergy[k]);
+      trialCoords[k] = generateCoords(btype, atype, ttype, i);
 
       double r {trialCoords[k][0]};
       double theta {trialCoords[k][1]};
@@ -366,7 +364,7 @@ void PolymerMC::growNewChain() {
       }
 
       // Get lab frame coordinates
-      trialPos[k] = Mat::matvec(rotate, pos) + v1;
+      trialPos[k] = Mat::matvec(rotate, pos) + prev;
       box.wrapPos(&trialPos[k], trialImage[k]);
 
       trialNonBondEnergy[k] =
@@ -378,11 +376,7 @@ void PolymerMC::growNewChain() {
     }
 
     // Pick which trial segment to accept
-    for (int k {}; k < ntrials; k++) {
-      trialProbs[k] /= weight;
-    }
-
-    double p {rand.nextDouble()};
+    double p {rand.nextDouble()*weight};
     int selected {};
     for (int k {}; k < ntrials; k++) {
       p -= trialProbs[k];
@@ -431,7 +425,7 @@ void PolymerMC::traceOldChain() {
 
   int btype, atype, ttype, ptype;
   unsigned int beadMask;
-  Vec v1, v2, v3;
+  Vec prev;
 
   for (int i {1}; i < chainSize; i++) {
     trialPos[0] = chains[oldChainIndex][i].pos; // Store current config
@@ -439,9 +433,7 @@ void PolymerMC::traceOldChain() {
     for (int j {}; j < 3; j++) {
       trialImage[0][j] = chains[oldChainIndex][i].image[j];
     }
-    v1 = chains[oldChainIndex][i-1].pos;
-    v2 = (i == 1 ? v1 : chains[oldChainIndex][i-2].pos);
-    v3 = (i <= 2 ? v2 : chains[oldChainIndex][i-3].pos);
+    prev = chains[oldChainIndex][i-1].pos;
     btype = bondType[i];
     atype = angleType[i];
     ttype = torsionType[i];
@@ -461,8 +453,7 @@ void PolymerMC::traceOldChain() {
     weight += expEnergy;
 
     for (int k {1}; k < ntrials; k++) {
-      generateBead(v1, v2, v3, btype, atype, ttype,
-                   i, &trialCoords[k], &trialBondEnergy[k]);
+      trialCoords[k] = generateCoords(btype, atype, ttype, i);
 
       double r {trialCoords[k][0]};
       double theta {trialCoords[k][1]};
@@ -478,7 +469,7 @@ void PolymerMC::traceOldChain() {
       }
 
       // Get lab frame coordinates
-      trialPos[k] = Mat::matvec(rotate, pos) + v1;
+      trialPos[k] = Mat::matvec(rotate, pos) + prev;
       box.wrapPos(&trialPos[k], trialImage[k]);
 
       trialNonBondEnergy[k] =
@@ -524,31 +515,22 @@ double PolymerMC::computeWallEnergy(unsigned int beadMask, const Vec& pos) {
   return energy;
 }
 
-void PolymerMC::generateBead(const Vec& v1, const Vec& v2, const Vec& v3,
-                             int btype, int atype, int ttype,
-                             int beadIndex, Vec* coords, double* energy) {
-  double r {}, theta {}, phi {};
-  double bondEnergy {}, angleEnergy {}, torsionEnergy {};
-
+Vec PolymerMC::generateCoords(int btype, int atype, int ttype, int beadIndex) {
+  Vec coords {};
   if (beadIndex == 1) {
-    distrbBond->generate(btype, v1, &r, &bondEnergy);
-    distrbAngleUni->generate(atype, v1, v2, &theta, &angleEnergy);
-    distrbTorsionUni->generate(ttype, v1, v2, v3, &phi, &torsionEnergy);
+    coords[0] = distrbBond->generate(btype);
+    coords[1] = distrbAngleUni->generate(atype);
+    coords[2] = distrbTorsionUni->generate(ttype);
   } else if (beadIndex == 2) {
-    distrbBond->generate(btype, v1, &r, &bondEnergy);
-    distrbAngle->generate(atype, v1, v2, &theta, &angleEnergy);
-    distrbTorsionUni->generate(ttype, v1, v2, v3, &phi, &torsionEnergy);
+    coords[0] = distrbBond->generate(btype);
+    coords[1] = distrbAngle->generate(atype);
+    coords[2] = distrbTorsionUni->generate(ttype);
   } else if (beadIndex > 2) {
-    distrbBond->generate(btype, v1, &r, &bondEnergy);
-    distrbAngle->generate(atype, v1, v2, &theta, &angleEnergy);
-    distrbTorsion->generate(ttype, v1, v2, v3, &phi, &torsionEnergy);
+    coords[0] = distrbBond->generate(btype);
+    coords[1] = distrbAngle->generate(atype);
+    coords[2] = distrbTorsion->generate(ttype);
   }
-
-  (*coords)[0] = r;
-  (*coords)[1] = theta;
-  (*coords)[2] = phi;
-
-  *energy = bondEnergy + angleEnergy + torsionEnergy;
+  return coords;
 }
 
 void PolymerMC::setStartPos(const Vec& v) {

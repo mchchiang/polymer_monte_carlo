@@ -9,18 +9,16 @@
 #define ANGLE_DISTRB_UNIFORM_HPP_
 
 #include <cmath>
-#include "angle_distrb.hpp"
+#include "distrb.hpp"
 #include "util_vector.hpp"
 
-class AngleDistributionUniform : public AngleDistribution {
+class AngleDistributionUniform : public Distribution {
 
 public:
-  AngleDistributionUniform(int seed) : AngleDistribution(seed) {}
+  AngleDistributionUniform(int seed) : Distribution(seed) {}
   ~AngleDistributionUniform() {}
-  void generate(int angleType, const Vec& v1, const Vec& v2,
-                double* value, double* energy) {
-    *value = acos(1.0-2.0*nextRand());
-    *energy = 0.0;
+  double generate(int angleType) {
+    return acos(1.0-2.0*nextRand());
   }
 
 };

@@ -12,18 +12,18 @@
 #include <string>
 #include <vector>
 #include "angle.hpp"
-#include "angle_distrb.hpp"
+#include "distrb.hpp"
 
 
 class AngleFactory {
 
 private:
-  std::pair<Angle*,AngleDistribution*>
+  std::pair<Angle*,Distribution*>
   createAngleCosine(int ntypes, double k, double temp, int seed);
-  std::pair<Angle*,AngleDistribution*> createAngleNone(int seed);
+  std::pair<Angle*,Distribution*> createAngleNone(int seed);
 
 public:
-  std::pair<Angle*,AngleDistribution*> createAngle(
+  std::pair<Angle*,Distribution*> createAngle(
       std::string angleName, int ntypes, const std::vector<double>& args,
         double temp, int seed);
 };

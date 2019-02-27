@@ -15,26 +15,20 @@ BOOST_AUTO_TEST_SUITE(TestBondDistributionFixed)
 
 BOOST_AUTO_TEST_CASE(TestGenerate1) {
   BondDistributionFixed distrb {3242, 1.0};
-  double value {}, energy {};
-  distrb.generate(0, {}, &value, &energy);
+  double value {distrb.generate(0)};
   BOOST_CHECK_CLOSE(value, 1.0, tol);
-  BOOST_CHECK_CLOSE(energy, 0.0, tol);
 }
 
 BOOST_AUTO_TEST_CASE(TestGenerate2) {
   BondDistributionFixed distrb {431, 3.0};
-  double value {}, energy {};
-  distrb.generate(0, {}, &value, &energy);
+  double value {distrb.generate(0)};
   BOOST_CHECK_CLOSE(value, 3.0, tol);
-  BOOST_CHECK_CLOSE(energy, 0.0, tol);
 }
 
 BOOST_AUTO_TEST_CASE(TestGenerate3) {
   BondDistributionFixed distrb {99, 2.4};
-  double value {}, energy {};
-  distrb.generate(0, {}, &value, &energy);
+  double value {distrb.generate(0)};
   BOOST_CHECK_CLOSE(value, 2.4, tol);
-  BOOST_CHECK_CLOSE(energy, 0.0, tol);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
